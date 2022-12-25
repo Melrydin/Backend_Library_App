@@ -1,7 +1,7 @@
 from sqlalchemy.orm import Session
 from sqlalchemy import update
 from sqlalchemy.sql import text
-import models, schemas
+from . import models, schemas
 
 
 def getAllBooks(db: Session):
@@ -100,7 +100,7 @@ def trueFasleCounter(db: Session):
     true = db.execute(text("SELECT COUNT(b.wishlist) FROM books b WHERE b.wishlist = TRUE")).fetchall()
     false = db.execute(text("SELECT COUNT(b.wishlist) FROM books b WHERE b.wishlist = FALSE")).fetchall()
     gift = db.execute(
-        text("SELECT COUNT(b.wishlist) FROM books b WHERE b.wishlist = FALSE AND b.gift = TRUE")).fetchall()
+    text("SELECT COUNT(b.wishlist) FROM books b WHERE b.wishlist = FALSE AND b.gift = TRUE")).fetchall()
     borrow = db.execute(text("SELECT COUNT(b.borrow) FROM books b WHERE b.borrow = TRUE")).fetchall()
     true = true[0]["COUNT(b.wishlist)"]
     false = false[0]["COUNT(b.wishlist)"]
@@ -113,14 +113,15 @@ def trueFasleCounter(db: Session):
 
 
 def librayOrWishlist(db: Session, trueOrFalse: bool, category: str):
-    list = db.execute(text(
-        f"SELECT * FROM books b WHERE (b.wishlist = {trueOrFalse} AND b.category = '{category}' AND NOT b.borrow) ORDER BY b.author")).fetchall()
-    return list
+    resultList = db.execute(
+        text(f"SELECT * FROM books b WHERE (b.wishlist = {trueOrFalse} AND b.category = '{category}' AND NOT b.borrow) ORDER BY (b.author AND b.volume)")).fetchall()
+    return resultList
 
 
 def borrow(db: Session, category: str):
-    list = db.execute(text(f"SELECT * FROM books b WHERE (b.borrow = TRUE AND b.category = '{category}')")).fetchall()
-    return list
+    resultList = db.execute(
+        text(f"SELECT * FROM books b WHERE (b.borrow = TRUE AND b.category = '{category}')")).fetchall()
+    return resultList
 
 
 def authorCounter(db: Session):

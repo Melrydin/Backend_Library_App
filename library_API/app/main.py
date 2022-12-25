@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends
 from sqlmodel import Session
-from database import get_db
-import crud, schemas
+from .database import get_db
+from . import crud, schemas
 
 app = FastAPI()
 
