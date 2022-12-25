@@ -4,6 +4,7 @@ from datetime import date
 from typing import Optional
 from enum import Enum
 
+
 class BookTyps(str, Enum):
     manga = "Manga"
     Novel = "Novel"

@@ -1,9 +1,9 @@
 from sqlalchemy import Boolean, Column, Integer, Date, Float, Text
 from database import Base
 
-class BookDataModel(Base):
 
-    __tablename__ = "booksV2"
+class BookDataModel(Base):
+    __tablename__ = "books"
 
     id = Column(Integer, primary_key=True)
     category = Column(Text)
@@ -21,5 +21,3 @@ class BookDataModel(Base):
     payDate = Column(Date)
     startDate = Column(Date)
     endDate = Column(Date)
-
-
