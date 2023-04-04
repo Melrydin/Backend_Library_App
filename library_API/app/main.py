@@ -1,7 +1,7 @@
-from fastapi import FastAPI, Depends
+from fastapi import FastAPI, Depends, Response, UploadFile, File
 from sqlmodel import Session
-from .database import get_db
-from . import crud, schemas
+from database import get_db
+import crud, schemas
 
 app = FastAPI()
 
@@ -15,7 +15,6 @@ async def hallo():
 async def add_Book(book: schemas.BookDataSchema, db: Session = Depends(get_db)):
     new_book = crud.addNewBook(db=db, book=book)
     return new_book
-
 
 @app.delete("/delete/{bookId}")
 async def delete_Book(book_id: int, db: Session = Depends(get_db)):
@@ -96,6 +95,22 @@ async def publisher_Counter(db: Session = Depends(get_db)):
 
 
 @app.get("/searche/", response_model=list[schemas.BookDataSchema])
-async def search_Library(db: Session = Depends(get_db), titleOrAuthor: str = "%", trueOrFalse: bool = True):
-    searchResult = crud.search(db=db, titleOrAuthor=titleOrAuthor, trueOrFalse=trueOrFalse)
+async def search_Library(db: Session = Depends(get_db), search: str = "%",):
+    searchResult = crud.search(db=db, search=search)
     return searchResult
+
+@app.get("/findBookByIsbn/")
+async def findBookByIsbn(db: Session = Depends(get_db), isbn: int = 0):
+    result = crud.findBookByIsbn(db=db, isbn=isbn)
+    return result
+
+@app.get("/download_books_csv", response_model=None)
+async def download_books_csv(db: Session = Depends((get_db))):
+    csv_data = crud.exportCsv(db)
+    return Response(content=csv_data, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename="books.csv"'})
+
+@app.post("/upload_book_csv")
+async def upload_book_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    content = await file.read()
+    crud.importCsv(db=db, file=content)
+    return {"message": "Books uploaded successfully."}

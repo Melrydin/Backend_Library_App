@@ -1,11 +1,11 @@
 from sqlalchemy import Boolean, Column, Integer, Date, Float, Text
-from .database import Base
+from database import Base
 
 
 class BookDataModel(Base):
     __tablename__ = "books"
 
-    id = Column(Integer, primary_key=True)
+    id = Column(Integer, primary_key=True, index=True)
     category = Column(Text)
     title = Column(Text)
     series = Column(Boolean)
