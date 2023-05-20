@@ -12,68 +12,69 @@ async def hallo():
 
 
 @app.post("/add/")
-async def add_Book(book: schemas.BookDataSchema, db: Session = Depends(get_db)):
-    new_book = crud.addNewBook(db=db, book=book)
-    return new_book
+async def addBook(book: schemas.BookDataSchema, db: Session = Depends(get_db)):
+    newBook = crud.addNewBook(db=db, book=book)
+    return newBook
 
 @app.delete("/delete/{bookId}")
-async def delete_Book(book_id: int, db: Session = Depends(get_db)):
+async def deleteBook(book_id: int, db: Session = Depends(get_db)):
     del_book = crud.deleteBook(db=db, id=book_id)
     return del_book
 
 
 @app.post("/update/{bookId}")
-async def update_Book(book_id: int, book: schemas.BookDataSchema, db: Session = Depends(get_db)):
+async def updateBook(book_id: int, book: schemas.BookDataSchema, db: Session = Depends(get_db)):
     up_book = crud.updateBook(db=db, id=book_id, book=book)
     return up_book
 
 
-@app.get("/get_book/{bookId}", response_model=schemas.BookDataSchema)
-async def get_Book(bookId: int, db: Session = Depends(get_db)):
+@app.get("/getBook/{bookId}")
+async def getBook(bookId: int, db: Session = Depends(get_db)):
     book = crud.getBook(db=db, id=bookId)
     return book
 
 
-@app.get("/get_all_books/", response_model=list[schemas.BookDataSchema])
-async def get_All_Books(db: Session = Depends(get_db)):
+
+@app.get("/getAll/", response_model=list[schemas.BookDataSchema])
+async def getAllBooks(db: Session = Depends(get_db)):
     books = crud.getAllBooks(db)
     return books
 
 
-@app.get("/all_pay/", response_model=float)
-async def all_Pay(db: Session = Depends(get_db)):
+@app.get("/allPay/", response_model=float)
+async def allPay(db: Session = Depends(get_db)):
     result = crud.allPay(db=db)
     return round(result, 2)
 
 
-@app.get("/year_pay/{year}", response_model=float)
-async def year_Pay(year: int, db: Session = Depends(get_db)):
+@app.get("/yearPay/{year}", response_model=float)
+async def yearPay(year: int, db: Session = Depends(get_db)):
     result = crud.yearPay(db=db, year=year)
     return round(result, 2)
 
 
-@app.get("/years_in_Table/")
-async def years_In_Table(db: Session = Depends(get_db)):
+@app.get("/yearsInTable/")
+async def yearsInTable(db: Session = Depends(get_db)):
     result = crud.yearsInTable(db=db)
     return result
 
 
-@app.get("/month_pay/{year}{month}", response_model=float)
-async def month_Pay(year: int, month: int, db: Session = Depends(get_db)):
+@app.get("/monthpay/{year}{month}", response_model=float)
+async def monthPay(year: int, month: int, db: Session = Depends(get_db)):
     month = crud.monthPay(db=db, year=year, month=month)
     return month
 
 
-@app.get("/true_and_false_counter/")
-async def true_Fasle_Counter(db: Session = Depends(get_db)):
-    counter = crud.trueFasleCounter(db=db)
+@app.get("/trueAndFalseCounter/")
+async def trueFasleCounter(db: Session = Depends(get_db)):
+    counter = crud.trueFalseCounter(db=db)
     return counter
 
 
-@app.get("/library_Or_wishlist/{value}&{category}", response_model=list[schemas.BookDataSchema])
-async def library_Or_Wishlist(db: Session = Depends(get_db), value: bool = True, category: str = 'Manga'):
-    librayOrWishlist = crud.librayOrWishlist(db=db, trueOrFalse=value, category=category)
-    return librayOrWishlist
+@app.get("/libraryOrWishlist/{value}&{category}", response_model=list[schemas.BookDataSchema])
+async def libraryOrWishlist(db: Session = Depends(get_db), value: bool = True, category: str = 'Manga'):
+    libraryOrWishlist = crud.libraryOrWishlist(db=db, trueOrFalse=value, category=category)
+    return libraryOrWishlist
 
 
 @app.get("/borrow/{category}", response_model=list[schemas.BookDataSchema])
@@ -82,20 +83,20 @@ async def borrow(db: Session = Depends(get_db), category: str = 'Manga'):
     return borrow
 
 
-@app.get("/author_Counter/")
-async def author_Counter(db: Session = Depends(get_db)):
+@app.get("/authorCounter/")
+async def authorCounter(db: Session = Depends(get_db)):
     author = crud.authorCounter(db=db)
     return author
 
 
-@app.get("/publisher_Counter/")
-async def publisher_Counter(db: Session = Depends(get_db)):
+@app.get("/publisherCounter/")
+async def publisherCounter(db: Session = Depends(get_db)):
     publisher = crud.publisherCounter(db=db)
     return publisher
 
 
 @app.get("/searche/", response_model=list[schemas.BookDataSchema])
-async def search_Library(db: Session = Depends(get_db), search: str = "%",):
+async def searchLibrary(db: Session = Depends(get_db), search: str = "%",):
     searchResult = crud.search(db=db, search=search)
     return searchResult
 
@@ -104,13 +105,13 @@ async def findBookByIsbn(db: Session = Depends(get_db), isbn: int = 0):
     result = crud.findBookByIsbn(db=db, isbn=isbn)
     return result
 
-@app.get("/download_books_csv", response_model=None)
-async def download_books_csv(db: Session = Depends((get_db))):
-    csv_data = crud.exportCsv(db)
-    return Response(content=csv_data, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename="books.csv"'})
+@app.get("/downloadBooks", response_model=None)
+async def downloadBooks(db: Session = Depends((get_db))):
+    csvData = crud.exportCsv(db)
+    return Response(content=csvData, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename="books.csv"'})
 
-@app.post("/upload_book_csv")
-async def upload_book_csv(file: UploadFile = File(...), db: Session = Depends(get_db)):
+@app.post("/uploadBooks")
+async def uploadBook(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
     crud.importCsv(db=db, file=content)
     return {"message": "Books uploaded successfully."}

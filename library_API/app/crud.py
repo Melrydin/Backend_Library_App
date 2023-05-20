@@ -40,16 +40,16 @@ def addNewBook(db: Session, book: schemas.BookDataSchema):
         return {"message": "Book already exists"}
 
 
-
-def getBook(db: Session, id: id):
+def getBook(db: Session, id: int):
     result = db.query(Book).get(id)
     if result is not None:
+        response_model = schemas.BookDataSchema
         return result
     else:
         return {"message": "Entry not Found"}
 
 
-def deleteBook(db: Session, id: id):
+def deleteBook(db: Session, id: int):
     book = db.query(Book).get(id)
     if book is not None:
         db.delete(book)
@@ -60,25 +60,29 @@ def deleteBook(db: Session, id: id):
 
 
 def updateBook(db: Session, id: int, book: schemas.BookDataSchema):
-    stmt = update(Book).where(Book.id == id).values(
-        category=book.category,
-        title=book.title,
-        series=book.series,
-        volume=book.volume,
-        author=book.author,
-        publisher=book.publisher,
-        price=book.price,
-        isbn=book.isbn,
-        wishlist=book.wishlist,
-        gift=book.gift,
-        borrow=book.borrow,
-        releaseDate=book.releaseDate,
-        payDate=book.payDate,
-        startDate=book.startDate,
-        endDate=book.endDate)
-    db.execute(stmt)
-    db.commit()
-    return {"message": "Update Book successful"}
+    bookExist = db.query(Book).get(id)
+    if bookExist is not None:
+        stmt = update(Book).where(Book.id == id).values(
+            category=book.category,
+            title=book.title,
+            series=book.series,
+            volume=book.volume,
+            author=book.author,
+            publisher=book.publisher,
+            price=book.price,
+            isbn=book.isbn,
+            wishlist=book.wishlist,
+            gift=book.gift,
+            borrow=book.borrow,
+            releaseDate=book.releaseDate,
+            payDate=book.payDate,
+            startDate=book.startDate,
+            endDate=book.endDate)
+        db.execute(stmt)
+        db.commit()
+        return {"message": "Update Book successful"}
+    else:
+        return {"message": "Entry not Found"}
 
 
 def allPay(db: Session):
@@ -95,7 +99,7 @@ def yearPay(db: Session, year: int):
     """
     stmt = db.query(Book.price).filter(
         Book.payDate >= f"{year}-01-01",
-        Book.payDate < f"{year+1}-01-01",
+        Book.payDate < f"{year + 1}-01-01",
         Book.gift != True
     ).all()
     if stmt is not None:
@@ -105,9 +109,9 @@ def yearPay(db: Session, year: int):
 
 
 def yearsInTable(db: Session):
-    stmt = db.query(func.YEAR(Book.payDate).label("Year")).\
-            filter(Book.payDate != None, func.YEAR(Book.payDate) > 2021).\
-            group_by(func.YEAR(Book.payDate)).all()
+    stmt = db.query(func.YEAR(Book.payDate).label("Year")). \
+        filter(Book.payDate != None, func.YEAR(Book.payDate) > 2021). \
+        group_by(func.YEAR(Book.payDate)).all()
     return stmt
 
 
@@ -130,10 +134,10 @@ def trueFalseCounter(db: Session):
     """
     Get count of books that have wishlist=True, wishlist=False, gift=True, and borrow=True
     """
-    true = db.query(func.count()).filter_by(wishlist=True).scalar()
-    false = db.query(func.count()).filter_by(wishlist=False).scalar()
-    gift = db.query(func.count()).filter_by(wishlist=False, gift=True).scalar()
-    borrow = db.query(func.count()).filter_by(borrow=True).scalar()
+    true = db.query(func.count()).filter(Book.wishlist == True).scalar()
+    false = db.query(func.count()).filter(Book.wishlist == False).scalar()
+    gift = db.query(func.count()).filter(Book.wishlist == False, Book.gift == True).scalar()
+    borrow = db.query(func.count()).filter(Book.borrow == True).scalar()
     return {"true": true,
             "false": false,
             "gift": gift,
@@ -184,8 +188,8 @@ def search(db: Session, search: str):
             Book.publisher.ilike(f"%{search}%"),
             Book.isbn.ilike(f"%{search}%"))
     ).all()
-    # Gib die Ergebnisse zurück
     return results
+
 
 def findBookByIsbn(db: Session, isbn: int):
     """
@@ -198,28 +202,31 @@ def findBookByIsbn(db: Session, isbn: int):
     else:
         return False
 
+
 def exportCsv(db: Session):
-    booksList = getAllBooks(db)
-    booksDictList = convertBooksToDict(booksList)
-    df = pd.DataFrame.from_records(booksDictList)
+    books = getAllBooks(db)
+    books = convertBooksToDict(books)
+    df = pd.DataFrame.from_records(books)
     df = df.drop(columns=['id'])
     df.to_csv('books.csv', index=False)
+
 
 def importCsv(db: Session, file):
     df = pd.read_csv(io.StringIO(file.decode("utf-8")))
     df.fillna('None', inplace=True)
-    db_books = [Book(**book) for book in df.to_dict(orient="records")]
-    for book in db_books:
-        print(book.isbn)
-        addNewBook(db,book)
+    books = [Book(**book) for book in df.to_dict(orient="records")]
+    for book in books:
+        addNewBook(db, book)
 
-def convertBooksToDict(booksList):
+
+def convertBooksToDict(books):
     booksDictList = []
-    for book in booksList:
+    for book in books:
         bookDict = book.__dict__
-        bookDict.pop('_sa_instance_state', None) # remove _sa_instance_state which is used by SQLAlchemy
+        bookDict.pop('_sa_instance_state', None)  # remove _sa_instance_state which is used by SQLAlchemy
         booksDictList.append(bookDict)
     return booksDictList
+
 
 def calculator(stmt, str):
     counter = 0.0
