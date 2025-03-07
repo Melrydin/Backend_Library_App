@@ -1,4 +1,6 @@
 import io
+import json
+import pandas as pd
 
 from sqlalchemy.orm import Session
 from sqlalchemy import text, func, update
@@ -6,7 +8,8 @@ from sqlalchemy.sql.expression import or_, not_
 
 from models import BookDataModel as Book
 import schemas
-import pandas as pd
+
+
 
 
 def getAllBooks(db: Session):
@@ -203,29 +206,85 @@ def findBookByIsbn(db: Session, isbn: int):
         return False
 
 
-def exportCsv(db: Session):
-    books = getAllBooks(db)
-    books = convertBooksToDict(books)
-    df = pd.DataFrame.from_records(books)
-    df = df.drop(columns=['id'])
-    df.to_csv('books.csv', index=False)
-
-
-def importCsv(db: Session, file):
-    df = pd.read_csv(io.StringIO(file.decode("utf-8")))
-    df.fillna('None', inplace=True)
-    books = [Book(**book) for book in df.to_dict(orient="records")]
+def exportJson(db: Session):
+    """
+    Export all books from the database as a JSON file
+    """
+    books = db.query(Book).all()
+    # Convert SQLAlchemy objects to dictionaries
+    book_list = []
     for book in books:
-        addNewBook(db, book)
+        book_dict = {
+            "id": book.id,
+            "category": book.category,
+            "title": book.title,
+            "series": book.series,
+            "volume": book.volume,
+            "author": book.author,
+            "publisher": book.publisher,
+            "price": book.price,
+            "isbn": book.isbn,
+            "wishlist": book.wishlist,
+            "gift": book.gift,
+            "borrow": book.borrow,
+            "releaseDate": str(book.releaseDate) if book.releaseDate else None,
+            "payDate": str(book.payDate) if book.payDate else None,
+            "startDate": str(book.startDate) if book.startDate else None,
+            "endDate": str(book.endDate) if book.endDate else None
+        }
+        book_list.append(book_dict)
+
+    # Convert to JSON
+    json_data = json.dumps(book_list, ensure_ascii=False, indent=4)
+    return json_data
 
 
-def convertBooksToDict(books):
-    booksDictList = []
-    for book in books:
-        bookDict = book.__dict__
-        bookDict.pop('_sa_instance_state', None)  # remove _sa_instance_state which is used by SQLAlchemy
-        booksDictList.append(bookDict)
-    return booksDictList
+def importJson(db: Session, file):
+    """
+    Import books from a JSON file into the database
+    """
+    try:
+        # Parse JSON from bytes to Python objects
+        data = json.loads(file.decode('utf-8'))
+
+        # Process each book in the JSON
+        for book_data in data:
+            # Check if book with this ISBN already exists
+            existing_book = db.query(Book).filter(Book.isbn == book_data["isbn"]).first()
+
+            if not existing_book:
+                # Convert date strings back to date objects if they exist
+                releaseDate = pd.to_datetime(book_data["releaseDate"]).date() if book_data["releaseDate"] else None
+                payDate = pd.to_datetime(book_data["payDate"]).date() if book_data["payDate"] else None
+                startDate = pd.to_datetime(book_data["startDate"]).date() if book_data["startDate"] else None
+                endDate = pd.to_datetime(book_data["endDate"]).date() if book_data["endDate"] else None
+
+                # Create new book
+                new_book = Book(
+                    category=book_data["category"],
+                    title=book_data["title"],
+                    series=book_data["series"],
+                    volume=book_data["volume"],
+                    author=book_data["author"],
+                    publisher=book_data["publisher"],
+                    price=book_data["price"],
+                    isbn=book_data["isbn"],
+                    wishlist=book_data["wishlist"],
+                    gift=book_data["gift"],
+                    borrow=book_data["borrow"],
+                    releaseDate=releaseDate,
+                    payDate=payDate,
+                    startDate=startDate,
+                    endDate=endDate
+                )
+                db.add(new_book)
+
+        # Commit all changes at once
+        db.commit()
+        return {"imported": len(data)}
+    except Exception as e:
+        db.rollback()
+        return {"error": str(e)}
 
 
 def calculator(stmt, str):

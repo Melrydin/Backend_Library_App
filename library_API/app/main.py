@@ -106,12 +106,16 @@ async def findBookByIsbn(db: Session = Depends(get_db), isbn: int = 0):
     return result
 
 @app.get("/downloadBooks", response_model=None)
-async def downloadBooks(db: Session = Depends((get_db))):
-    csvData = crud.exportCsv(db)
-    return Response(content=csvData, media_type='text/csv', headers={'Content-Disposition': 'attachment; filename="books.csv"'})
+async def downloadBooks(db: Session = Depends(get_db)):
+    json_data = crud.exportJson(db)
+    return Response(
+        content=json_data,
+        media_type='application/json',
+        headers={'Content-Disposition': 'attachment; filename="books.json"'}
+    )
 
 @app.post("/uploadBooks")
-async def uploadBook(file: UploadFile = File(...), db: Session = Depends(get_db)):
+async def uploadBooks(file: UploadFile = File(...), db: Session = Depends(get_db)):
     content = await file.read()
-    crud.importCsv(db=db, file=content)
+    crud.importJson(db=db, file=content)
     return {"message": "Books uploaded successfully."}

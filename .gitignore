@@ -23,10 +23,11 @@ var/
 *.egg-info/
 .installed.cfg
 *.egg
+*.json
 
 # Data Backup
 dataBackup.py
-SQL_Helper
+SQL_Helper.sql
 *.csv
 
 # PyInstaller
