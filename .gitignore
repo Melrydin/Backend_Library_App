@@ -27,7 +27,6 @@ var/
 
 # Data Backup
 dataBackup.py
-SQL_Helper.sql
 *.csv
 
 # PyInstaller

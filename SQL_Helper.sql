@@ -1,3 +1,17 @@
+docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql:latest
+
+Go to the Server Terminal and run
+
+CREATE DATABASE library;
+
+CREATE USER 'libraryAPI'@'%' IDENTIFIED BY 'hallowelt';
+
+GRANT ALL PRIVILEGES ON library.* TO 'libraryAPI'@'%';
+
+FLUSH PRIVILEGES;
+
+use library;
+
 CREATE TABLE books (
     id INTEGER unsigned NOT NULL AUTO_INCREMENT,
     category ENUM('Manga', 'Novel', 'Technical'),
