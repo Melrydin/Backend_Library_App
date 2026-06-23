@@ -6,9 +6,8 @@ from sqlalchemy.orm import Session
 from sqlalchemy import text, func, update
 from sqlalchemy.sql.expression import or_, not_
 
-from models import BookDataModel as Book
-import schemas
-
+from app.models import BookDataModel as Book
+from app import schemas
 
 
 
@@ -44,7 +43,7 @@ def addNewBook(db: Session, book: schemas.BookDataSchema):
 
 
 def getBook(db: Session, id: int):
-	result = db.query(Book).get(id)
+	result = db.get(Book, id)
 	if result is not None:
 		response_model = schemas.BookDataSchema
 		return result
@@ -53,7 +52,7 @@ def getBook(db: Session, id: int):
 
 
 def deleteBook(db: Session, id: int):
-	book = db.query(Book).get(id)
+	book = db.get(Book, id)
 	if book is not None:
 		db.delete(book)
 		db.commit()
@@ -187,8 +186,7 @@ def search(db: Session, search: str):
 	results = db.query(Book).filter(
 		or_(Book.title.ilike(f"%{search}%"),
 			Book.author.ilike(f"%{search}%"),
-			Book.publisher.ilike(f"%{search}%"),
-			Book.isbn.ilike(f"%{search}%"))
+			Book.publisher.ilike(f"%{search}%"))
 	).all()
 	return results
 
@@ -198,7 +196,6 @@ def findBookByIsbn(db: Session, isbn: int):
 	Define function to find a book by its ISBN
 	"""
 	result = db.query(Book).filter_by(isbn=isbn).first()
-	db.close()
 	if result:
 		return True
 	else:

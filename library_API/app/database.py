@@ -10,7 +10,7 @@ if not MARIADB_DATABASE_URL:
         "Set it in docker-compose.yaml, e.g. "
         "mysql+pymysql://<user>:<password>@<db-host>:3306/<database>"
     )
-engine = create_engine(MARIADB_DATABASE_URL, echo=True)
+engine = create_engine(MARIADB_DATABASE_URL, echo=False)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 Base = declarative_base()
 

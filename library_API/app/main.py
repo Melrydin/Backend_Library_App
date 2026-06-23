@@ -1,7 +1,7 @@
 from fastapi import FastAPI, Depends, Response, UploadFile, File, HTTPException
 from sqlmodel import Session
-from database import get_db
-import crud, schemas
+from app.database import get_db
+from app import crud, schemas
 
 app = FastAPI()
 
