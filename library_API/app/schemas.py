@@ -1,7 +1,7 @@
 from sqlmodel import Field
 from pydantic import BaseModel, ConfigDict
 from datetime import date
-from typing import Optional, List
+from typing import Optional
 from enum import Enum
 
 
@@ -34,7 +34,6 @@ class BookDataSchema(BaseModel):
 
 # Scheme for updating books
 class BookUpdateSchema(BaseModel):
-	# All fields are optional and have no default value.
 	category: Optional[BookTyps] = None
 	title: Optional[str] = None
 	series: Optional[bool] = None
