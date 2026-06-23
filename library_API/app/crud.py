@@ -11,12 +11,12 @@ from app import schemas
 
 
 
-def getAllBooks(db: Session):
+def get_all_books(db: Session):
 	return db.query(Book).all()
 
 
-def addNewBook(db: Session, book: schemas.BookDataSchema):
-	if findBookByIsbn(db=db, isbn=book.isbn) is not True:
+def add_new_book(db: Session, book: schemas.BookDataSchema):
+	if find_book_by_isbn(db=db, isbn=book.isbn) is not True:
 		new_book = Book(
 			category=book.category,
 			title=book.title,
@@ -42,7 +42,7 @@ def addNewBook(db: Session, book: schemas.BookDataSchema):
 		return {"message": "Book already exists"}
 
 
-def getBook(db: Session, id: int):
+def get_book(db: Session, id: int):
 	result = db.get(Book, id)
 	if result is not None:
 		response_model = schemas.BookDataSchema
@@ -51,7 +51,7 @@ def getBook(db: Session, id: int):
 		return {"message": "Entry not Found"}
 
 
-def deleteBook(db: Session, id: int):
+def delete_book(db: Session, id: int):
 	book = db.get(Book, id)
 	if book is not None:
 		db.delete(book)
@@ -61,7 +61,7 @@ def deleteBook(db: Session, id: int):
 		return {"message": "Entry not Found"}
 
 
-def updateBook(db: Session, id: int, book_update: schemas.BookUpdateSchema):
+def update_book(db: Session, id: int, book_update: schemas.BookUpdateSchema):
 	# Find the existing entry in the database by its ID
 	book_to_update = db.query(Book).filter(Book.id == id).first()
 
@@ -86,7 +86,7 @@ def updateBook(db: Session, id: int, book_update: schemas.BookUpdateSchema):
 	return book_to_update
 
 
-def allPay(db: Session):
+def all_pay(db: Session):
 	"""
 	Calculate the total amount paid for all books in the database.
 	"""
@@ -94,7 +94,7 @@ def allPay(db: Session):
 	return stmt[0][0]
 
 
-def yearPay(db: Session, year: int) -> float:
+def year_pay(db: Session, year: int) -> float:
 	"""
 	Calculate the total amount paid for books in a specific year.
 	"""
@@ -109,14 +109,14 @@ def yearPay(db: Session, year: int) -> float:
 		return 0.0
 
 
-def yearsInTable(db: Session):
+def years_in_table(db: Session):
 	stmt = db.query(func.YEAR(Book.payDate).label("Year")). \
 		filter(Book.payDate != None, func.YEAR(Book.payDate) > 2021). \
 		group_by(func.YEAR(Book.payDate)).all()
 	return [row._asdict() for row in stmt]
 
 
-def monthPay(db: Session, year: int, month: int):
+def month_pay(db: Session, year: int, month: int):
 	"""
 	Get total pay for a specific month in a specific year
 	"""
@@ -131,7 +131,7 @@ def monthPay(db: Session, year: int, month: int):
 		return 0
 
 
-def trueFalseCounter(db: Session):
+def true_false_counter(db: Session):
 	"""
 	Get count of books that have wishlist=True, wishlist=False, gift=True, and borrow=True
 	"""
@@ -145,7 +145,7 @@ def trueFalseCounter(db: Session):
 			"borrow": borrow}
 
 
-def libraryOrWishlist(db: Session, trueOrFalse: bool, category: str):
+def library_or_wishlist(db: Session, trueOrFalse: bool, category: str):
 	"""
 	Get list of books that either are in the library or on the wishlist
 	"""
@@ -163,7 +163,7 @@ def borrow(db: Session, category: str):
 	return result_list
 
 
-def authorCounter(db: Session):
+def author_counter(db: Session):
 	"""
 	Define function to count the number of books by each author
 	"""
@@ -171,7 +171,7 @@ def authorCounter(db: Session):
 	return [row._asdict() for row in authors]
 
 
-def publisherCounter(db: Session):
+def publisher_counter(db: Session):
 	"""
 	Define function to count the number of books by each publisher
 	"""
@@ -191,7 +191,7 @@ def search(db: Session, search: str):
 	return results
 
 
-def findBookByIsbn(db: Session, isbn: int):
+def find_book_by_isbn(db: Session, isbn: int):
 	"""
 	Define function to find a book by its ISBN
 	"""
@@ -202,7 +202,7 @@ def findBookByIsbn(db: Session, isbn: int):
 		return False
 
 
-def exportJson(db: Session):
+def export_json(db: Session):
 	"""
 	Export all books from the database as a JSON file
 	"""
@@ -235,7 +235,7 @@ def exportJson(db: Session):
 	return json_data
 
 
-def importJson(db: Session, file):
+def import_json(db: Session, file):
 	"""
 	Import books from a JSON file into the database
 	"""
