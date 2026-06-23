@@ -3,11 +3,18 @@ version: "3.11"
 services:
   fastapi:
     build: ./library_API
+    restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      # Format: mysql+pymysql://<user>:<passwort>@<db-host>:3306/<datenbankname>
+      # Format: mysql+pymysql://<user>:<password>@<db-host>:3306/<databasename>
       - DATABASE_URL=${DATABASE_URL:-mysql+pymysql://libraryAPI:hallowelt@mysql:3306/library}
+    healthcheck:
+      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
     networks:
       - default
       - mysql_default
