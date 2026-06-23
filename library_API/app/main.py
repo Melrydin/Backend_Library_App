@@ -3,6 +3,8 @@ from sqlmodel import Session
 from app.database import get_db
 from app import crud, schemas
 
+MAX_UPLOAD_SIZE = 10 * 1024 * 1024  # 10 MB
+
 app = FastAPI()
 
 
@@ -121,7 +123,15 @@ async def downloadBooks(db: Session = Depends(get_db)):
 	)
 
 @app.post("/uploadBooks")
-async def uploadBooks(file: UploadFile = File(...), db: Session = Depends(get_db)):
-	content = await file.read()
-	crud.import_json(db=db, file=content)
-	return {"message": "Books uploaded successfully."}
+async def upload_books(file: UploadFile = File(...), db: Session = Depends(get_db)):
+    if file.content_type not in ("application/json", "text/plain"):
+        raise HTTPException(status_code=400, detail="Only JSON files are accepted.")
+
+    content = await file.read()
+    if len(content) > MAX_UPLOAD_SIZE:
+        raise HTTPException(status_code=413, detail="File too large (max 10 MB).")
+
+    result = crud.import_json(db=db, file=content)
+    if "error" in result:
+        raise HTTPException(status_code=400, detail=result["error"])
+    return {"message": "Books uploaded successfully.", **result}
