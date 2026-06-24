@@ -1,32 +1,30 @@
 docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql:latest
 
-Go to the Server Terminal and run
+docker exec -it some-mysql mysql -u root -p password
 
-CREATE DATABASE library;
-
-CREATE USER 'libraryAPI'@'%' IDENTIFIED BY 'hallowelt';
-
-GRANT ALL PRIVILEGES ON library.* TO 'libraryAPI'@'%';
-
+CREATE DATABASE IF NOT EXISTS `library` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+CREATE USER IF NOT EXISTS 'libraryAPI'@'%' IDENTIFIED BY 'hallowelt';
+GRANT ALL PRIVILEGES ON `library`.* TO 'libraryAPI'@'%';
 FLUSH PRIVILEGES;
 
-use library;
+USE library;
 
-CREATE TABLE books (
-    id INTEGER unsigned NOT NULL AUTO_INCREMENT,
-    category ENUM('Manga', 'Novel', 'Technical'),
-    title TINYTEXT NOT NULL,
-    series TINYINT(1) NOT NULL,
-    volume TINYINT unsigned,
-    author TINYTEXT NOT NULL,
-    publisher TINYTEXT NOT NULL,
+CREATE TABLE IF NOT EXISTS books (
+    id INT UNSIGNED NOT NULL AUTO_INCREMENT,
+    category ENUM('Manga', 'Novel', 'Technical') NOT NULL,
+    title VARCHAR(255) NOT NULL,
+    series TINYINT(1) NOT NULL DEFAULT 0,
+    volume INT UNSIGNED NOT NULL,
+    author VARCHAR(150) NOT NULL,
+    publisher VARCHAR(150) NOT NULL,
     price DOUBLE NOT NULL,
-    isbn BIGINT(13) unsigned NOT NULL,
-    wishlist TINYINT(1) NOT NULL,
-    gift TINYINT(1) NOT NULL,
-    borrow TINYINT(1) NOT NULL,
-    releaseDate DATE,
-    payDate DATE,
-    startDate DATE,
-    endDate DATE,
-    CONSTRAINT pk_books PRIMARY KEY (id));
+    isbn BIGINT UNSIGNED NOT NULL UNIQUE,
+    wishlist TINYINT(1) NOT NULL DEFAULT 1,
+    gift TINYINT(1) NOT NULL DEFAULT 0,
+    borrow TINYINT(1) NOT NULL DEFAULT 0,
+    releaseDate DATE DEFAULT NULL,
+    payDate DATE DEFAULT NULL,
+    startDate DATE DEFAULT NULL,
+    endDate DATE DEFAULT NULL,
+    PRIMARY KEY (id)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

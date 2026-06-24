@@ -1,24 +1,21 @@
-version: "3.11"
-
 services:
   fastapi:
-    build: ./library_API
+    container_name: library_app
+    build: .
     restart: unless-stopped
     ports:
       - "5000:5000"
     environment:
-      # Format: mysql+pymysql://<user>:<password>@<db-host>:3306/<databasename>
       - DATABASE_URL=${DATABASE_URL:-mysql+pymysql://libraryAPI:hallowelt@mysql:3306/library}
     healthcheck:
-      test: ["CMD", "python3", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:5000/')"]
+      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
       interval: 10s
       timeout: 5s
       retries: 5
       start_period: 15s
     networks:
-      - default
-      - mysql_default
+      - library-network
 
 networks:
-  mysql_default:
+  library-network:
     external: true

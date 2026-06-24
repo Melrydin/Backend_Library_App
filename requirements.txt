@@ -1,0 +1,14 @@
+# Web Framework & Server
+fastapi==0.116.1
+uvicorn[standard]==0.35.0
+
+# Database & ORM
+sqlalchemy==2.0.43
+pymysql==1.1.2
+
+# Data Validation & File Processing
+pydantic==2.10.6
+python-multipart==0.0.20
+
+# Environment & Configuration
+python-dotenv==1.1.1
