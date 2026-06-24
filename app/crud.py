@@ -81,17 +81,30 @@ def year_pay(db: Session, year: int) -> float:
 	return db.scalar(stmt) or 0.0
 
 
-def years_in_table(db: Session) -> List[dict]:
+def years_pay_in_table(db: Session) -> List[dict]:
+	current_year = date.today().year
+
 	stmt = (
-		select(extract("year", Book.payDate).label("year"))
+		select(
+			extract("year", Book.payDate).label("year"),
+			func.sum(Book.price).label("total")
+		)
 		.where(
 			Book.payDate.isnot(None),
-			extract("year", Book.payDate) > 2021
+			Book.gift == False,
+			extract("year", Book.payDate) < current_year  # nur vergangene Jahre
 		)
 		.group_by(extract("year", Book.payDate))
+		.order_by(extract("year", Book.payDate))
 	)
+
 	result = db.execute(stmt)
-	return [{"year": int(row.year)} for row in result]
+	return [
+		{
+			"year": int(row.year),
+			"total": round(float(row.total), 2)
+		}
+		for row in result]
 
 
 def month_pay(db: Session, year: int, month: int) -> float:

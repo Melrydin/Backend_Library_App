@@ -7,12 +7,6 @@ services:
       - "5000:5000"
     environment:
       - DATABASE_URL=${DATABASE_URL:-mysql+pymysql://libraryAPI:hallowelt@mysql:3306/library}
-    healthcheck:
-      test: ["CMD", "curl", "-f", "http://localhost:5000/"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
-      start_period: 15s
     networks:
       - library-network
 
