@@ -71,9 +71,9 @@ async def month_pay(
 	return round(crud.month_pay(db, year, month), 2)
 
 
-@app.get("/stats/years-in-table/", tags=["Stats"])
-async def years_in_table(db: Session = Depends(get_db)):
-	return crud.years_in_table(db)
+@app.get("/stats/years_pay_in_table/", tags=["Stats"])
+async def years_pay_in_table(db: Session = Depends(get_db)):
+	return crud.years_pay_in_table(db)
 
 
 @app.get("/stats/true-false-counter/", tags=["Stats"])
