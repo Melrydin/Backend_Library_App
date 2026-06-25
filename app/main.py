@@ -97,7 +97,7 @@ async def search_books(search_term: str = Query(default="%", min_length=1), db: 
 
 
 @app.get("/books/isbn/{isbn}", response_model=schemas.BookRead, tags=["Search"])
-async def find_book_by_isbn(isbn: int, db: Session = Depends(get_db)):
+async def find_book_by_isbn(isbn: str, db: Session = Depends(get_db)):
 	book = crud.find_book_by_isbn(db, isbn)
 	if not book:
 		raise HTTPException(status_code=404, detail="Book not found")

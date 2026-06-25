@@ -1,9 +1,9 @@
-docker run --name some-mysql -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql:latest
+docker run --name mysql --network library-network -e MYSQL_ROOT_PASSWORD=password -p 3306:3306 -d mysql:8.4.0
 
-docker exec -it some-mysql mysql -u root -p password
+docker exec -it mysql mysql -u root -ppassword
 
 CREATE DATABASE IF NOT EXISTS `library` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
-CREATE USER IF NOT EXISTS 'libraryAPI'@'%' IDENTIFIED BY 'hallowelt';
+CREATE USER IF NOT EXISTS 'libraryAPI'@'%' IDENTIFIED BY 'PASSWORD';
 GRANT ALL PRIVILEGES ON `library`.* TO 'libraryAPI'@'%';
 FLUSH PRIVILEGES;
 
@@ -18,7 +18,7 @@ CREATE TABLE IF NOT EXISTS books (
     author VARCHAR(150) NOT NULL,
     publisher VARCHAR(150) NOT NULL,
     price DOUBLE NOT NULL,
-    isbn BIGINT UNSIGNED NOT NULL UNIQUE,
+    isbn VARCHAR(13) NOT NULL UNIQUE,
     wishlist TINYINT(1) NOT NULL DEFAULT 1,
     gift TINYINT(1) NOT NULL DEFAULT 0,
     borrow TINYINT(1) NOT NULL DEFAULT 0,

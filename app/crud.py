@@ -5,6 +5,7 @@ from typing import List, Optional
 from sqlalchemy import select, func, or_, extract
 from sqlalchemy.orm import Session
 from fastapi import HTTPException
+from fastapi.encoders import jsonable_encoder
 
 from app.models import BookDataModel as Book
 from app import schemas
@@ -54,6 +55,17 @@ def update_book(db: Session, book_id: int, book_update: schemas.BookUpdate) -> s
 		raise HTTPException(status_code=404, detail="Entry not found")
 
 	update_data = book_update.model_dump(exclude_unset=True)
+
+	new_isbn = update_data.get("isbn")
+	if new_isbn is not None and new_isbn != book.isbn:
+		conflict_stmt = select(Book).where(Book.isbn == new_isbn, Book.id != book_id)
+		conflict = db.scalars(conflict_stmt).first()
+		if conflict:
+			raise HTTPException(
+				status_code=409,
+				detail=f"ISBN {new_isbn} is already used by another book (id={conflict.id})",
+			)
+
 	for key, value in update_data.items():
 		setattr(book, key, value)
 
@@ -185,7 +197,7 @@ def search(db: Session, search_term: str) -> List[schemas.BookRead]:
 	return list(db.scalars(stmt).all())
 
 
-def find_book_by_isbn(db: Session, isbn: int) -> Optional[Book]:
+def find_book_by_isbn(db: Session, isbn: str) -> Optional[Book]:
 	stmt = select(Book).where(Book.isbn == isbn)
 	return db.scalars(stmt).first()
 
@@ -193,8 +205,9 @@ def find_book_by_isbn(db: Session, isbn: int) -> Optional[Book]:
 def export_json(db: Session) -> str:
 	stmt = select(Book)
 	books = db.scalars(stmt).all()
-	book_dicts = [schemas.BookBase.model_validate(book).model_dump() for book in books]
-	return json.dumps(book_dicts, ensure_ascii=False, indent=4)
+	book_dicts = [schemas.BookBase.model_validate(book, from_attributes=True).model_dump() for book in books]
+	data = jsonable_encoder(book_dicts)
+	return json.dumps(data, ensure_ascii=False, indent=4)
 
 
 def import_json(db: Session, file_content: bytes) -> dict:
