@@ -1,4 +1,6 @@
-from sqlalchemy import String, UniqueConstraint
+from decimal import Decimal
+
+from sqlalchemy import String, UniqueConstraint, Index, Numeric
 from sqlalchemy import Enum as SAEnum
 from sqlalchemy.orm import Mapped, mapped_column
 from typing import Optional
@@ -28,7 +30,7 @@ class BookDataModel(Base):
 	volume: Mapped[int] = mapped_column(nullable=False)
 	author: Mapped[str] = mapped_column(String(150), nullable=False)
 	publisher: Mapped[str] = mapped_column(String(150), nullable=False)
-	price: Mapped[float] = mapped_column(nullable=False)
+	price: Mapped[Decimal] = mapped_column(Numeric(10, 2), nullable=False)
 	isbn: Mapped[str] = mapped_column(String(13), nullable=False)
 
 	wishlist: Mapped[bool] = mapped_column(default=True)
@@ -42,4 +44,7 @@ class BookDataModel(Base):
 
 	__table_args__ = (
 		UniqueConstraint('isbn', name='uq_isbn'),
+		Index('idx_category', 'category'),
+		Index('idx_author', 'author'),
+		Index('idx_paydate', 'payDate'),
 	)

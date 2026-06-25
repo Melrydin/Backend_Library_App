@@ -17,8 +17,8 @@ CREATE TABLE IF NOT EXISTS books (
     volume INT UNSIGNED NOT NULL,
     author VARCHAR(150) NOT NULL,
     publisher VARCHAR(150) NOT NULL,
-    price DOUBLE NOT NULL,
-    isbn VARCHAR(13) NOT NULL UNIQUE,
+    price DECIMAL(10,2) NOT NULL,
+    isbn VARCHAR(13) NOT NULL,
     wishlist TINYINT(1) NOT NULL DEFAULT 1,
     gift TINYINT(1) NOT NULL DEFAULT 0,
     borrow TINYINT(1) NOT NULL DEFAULT 0,
@@ -26,5 +26,9 @@ CREATE TABLE IF NOT EXISTS books (
     payDate DATE DEFAULT NULL,
     startDate DATE DEFAULT NULL,
     endDate DATE DEFAULT NULL,
-    PRIMARY KEY (id)
+    PRIMARY KEY (id),
+    CONSTRAINT uq_isbn UNIQUE (isbn),
+    INDEX idx_category (category),
+    INDEX idx_author (author),
+    INDEX idx_paydate (payDate)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

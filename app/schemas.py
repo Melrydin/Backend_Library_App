@@ -1,4 +1,5 @@
 import re
+from decimal import Decimal
 
 from pydantic import BaseModel, ConfigDict, Field, field_validator
 from datetime import date
@@ -51,7 +52,7 @@ class BookBase(BaseModel):
 	author: str = Field(min_length=1, max_length=150)
 	publisher: str = Field(min_length=1, max_length=150)
 	volume: int = Field(ge=0, le=9999)
-	price: float = Field(ge=0.0, le=99999.99)
+	price: Decimal = Field(ge=0, le=99999.99, decimal_places=2)
 	isbn: str = Field(min_length=10, max_length=13)
 	series: bool = False
 	wishlist: bool = True
@@ -79,7 +80,7 @@ class BookUpdate(BaseModel):
 	volume: Optional[int] = Field(default=None, ge=0, le=9999)
 	author: Optional[str] = Field(default=None, min_length=1, max_length=150)
 	publisher: Optional[str] = Field(default=None, min_length=1, max_length=150)
-	price: Optional[float] = Field(default=None, ge=0.0, le=99999.99)
+	price: Optional[Decimal] = Field(default=None, ge=0, le=99999.99, decimal_places=2)
 	isbn: Optional[str] = Field(default=None, min_length=10, max_length=13)
 	wishlist: Optional[bool] = None
 	gift: Optional[bool] = None

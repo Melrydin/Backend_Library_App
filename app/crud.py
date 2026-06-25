@@ -1,5 +1,6 @@
 import json
 from datetime import date
+from decimal import Decimal
 from typing import List, Optional
 
 from sqlalchemy import select, func, or_, extract
@@ -74,15 +75,15 @@ def update_book(db: Session, book_id: int, book_update: schemas.BookUpdate) -> s
 	return book
 
 
-def all_pay(db: Session) -> float:
+def all_pay(db: Session) -> Decimal:
 	stmt = select(func.sum(Book.price)).where(
 		Book.payDate.isnot(None),
 		Book.gift == False
 	)
-	return db.scalar(stmt) or 0.0
+	return db.scalar(stmt) or Decimal("0.00")
 
 
-def year_pay(db: Session, year: int) -> float:
+def year_pay(db: Session, year: int) -> Decimal:
 	start_date = date(year, 1, 1)
 	end_date = date(year + 1, 1, 1)
 	stmt = select(func.sum(Book.price)).where(
@@ -90,7 +91,7 @@ def year_pay(db: Session, year: int) -> float:
 		Book.payDate < end_date,
 		Book.gift == False
 	)
-	return db.scalar(stmt) or 0.0
+	return db.scalar(stmt) or Decimal("0.00")
 
 
 def years_pay_in_table(db: Session) -> List[dict]:
@@ -119,7 +120,7 @@ def years_pay_in_table(db: Session) -> List[dict]:
 		for row in result]
 
 
-def month_pay(db: Session, year: int, month: int) -> float:
+def month_pay(db: Session, year: int, month: int) -> Decimal:
 	start_date = date(year, month, 1)
 	end_date = date(year + 1, 1, 1) if month == 12 else date(year, month + 1, 1)
 
@@ -128,7 +129,7 @@ def month_pay(db: Session, year: int, month: int) -> float:
 		Book.payDate < end_date,
 		Book.gift == False
 	)
-	return db.scalar(stmt) or 0.0
+	return db.scalar(stmt) or Decimal("0.00")
 
 
 def true_false_counter(db: Session) -> dict:
