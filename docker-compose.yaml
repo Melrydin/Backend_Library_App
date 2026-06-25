@@ -1,6 +1,7 @@
 services:
   fastapi:
     container_name: library_app
+    image: library-api:latest
     build: .
     restart: unless-stopped
     ports:
